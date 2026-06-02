@@ -9,6 +9,9 @@ from .mkcsv import sanitize_for_csv_injection
 from .cielab import cielab_core
 from .document import cielab_overview
 
+def pad(arr, length):
+    return np.pad(arr, (0, length - len(arr)), constant_values=np.nan)
+
 def cielab_gui():
 
     # EXPLANATIONS
@@ -66,7 +69,15 @@ def cielab_gui():
            wl = df.iloc[:, i]
            spec = df.iloc[:, i+1]
            df_pair = pd.DataFrame({"wl": wl,"spec": spec})
-           Li, ai, bi, YI, = cielab_core (bool_maxmin, YI_option, df_pair)
+           #COMMENT OUT 2026/05/28
+           #Li, ai, bi, YI, = cielab_core (bool_maxmin, YI_option, df_pair)
+           Li, ai, bi, YI, wl_grid, vals_i, wl_maxmin, vals_maxmin, wl_inflect, vals_inflect = cielab_core (bool_maxmin, YI_option, df_pair) # FIXED 2026/05/28
+           max_len = max(len(wl_grid), len(wl_maxmin), len(wl_inflect))
+           df_export = pd.DataFrame({"wl_grid": pad(wl_grid, max_len),"vals_i": pad(vals_i, max_len),
+                                     "wl_maxmin": pad(wl_maxmin, max_len),"vals_maxmin": pad(vals_maxmin, max_len),
+                                     "wl_inflect": pad(wl_inflect, max_len),"vals_inflect": pad(vals_inflect, max_len)}) # FIXED 2026/05/28 
+           csv_data = df_export.to_csv(index=False).encode("utf-8") # FIXED 2026/05/28
+           st.download_button(label=f"{name} のCSVダウンロード",data=csv_data,file_name=f"{name}_spectrum.csv",mime="text/csv") # FIXED 2026/05/28
            name_vals += [name]
            L_vals += [Li]
            a_vals += [ai]
