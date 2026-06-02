@@ -3,6 +3,8 @@ import os
 import pandas as pd
 import numpy as np
 from scipy.interpolate import interp1d, UnivariateSpline
+from scipy.ndimage import gaussian_filter1d
+from numpy.polynomial import Chebyshev
 import matplotlib.pyplot as plt
 from .nakamura import max_min_finder, linear_spectrum_ver2
 
@@ -176,7 +178,7 @@ def cielab_core (bool_maxmin, YI_option, df):
        st.stop()
     wl_grid = np.arange(300.0, 1001.0, 1.0)
     cs = UnivariateSpline (wl_vis, vals_vis, k=3, s=2)
-    
+
     # ADD START 2026/03/13 START
     cs2 = cs.derivative(n=2)
     y2 = cs2(wl_grid)
@@ -218,7 +220,7 @@ def cielab_core (bool_maxmin, YI_option, df):
     ax.plot(wl_i_clean, vals_i_clean, lw=2, c="blue", label="Corrected")
     if bool_maxmin == 'on':
        ax.plot(wl_maxmin, vals_maxmin, "go", label="Max and Minimum points for Correction")
-    ax.plot(wl_vis, vals_vis, lw=1, marker="o", ms=2, label="Measured") 
+    #ax.plot(wl_vis, vals_vis, lw=1, marker="o", ms=2, label="Measured")
     # ADD START 2026/03/13
     mask = wl_inflect <= 780
     ax.plot(wl_inflect[mask], vals_inflect[mask], "ro", ms=6, label="Inflection points")
@@ -245,7 +247,8 @@ def cielab_core (bool_maxmin, YI_option, df):
                      "></div>""",unsafe_allow_html=True)
     
     ### FINAL ACTION ###
-    return res["L"], res["a"], res["b"], YI
+    #return res["L"], res["a"], res["b"], YI  #comment out 2026/05/28
+    return res["L"], res["a"], res["b"], YI, wl_grid, vals_i, wl_maxmin, vals_maxmin, wl_inflect, vals_inflect # FIXED 2026/05/28 
     
 # MODULE ERROR MESSAGE
 if __name__ == "__main__":
